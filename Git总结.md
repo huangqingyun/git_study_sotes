@@ -290,7 +290,7 @@ gitk #打开图形界面
 
 #### 回滚和撤销文件
 
-上一章节讲述了 `reset` 基本形式的行为，我们还可以给它提供一个作用文件路径。 若指定了一个路径，`reset` 将会跳过第 1 步，并且将它的**作用范围限定**为指定的文件或文件集合。这样做是因为 `HEAD` 只是一个指针，你无法让它同时指向两个commit中各自的一部分。 不过索引和工作目录 可以部分更新，所以会继续进行第 2、3 步。
+上一章节讲述了 `reset` 基本形式的行为，我们还可以给它提供一个作用文件路径。 若指定了一个路径，`reset` 将会跳过第 1 步，并且将它的**作用范围限定**为指定的文件或文件集合。这样做是因为 `HEAD` 只是一个指针，你无法让它同时指向两个commit中各自的一部分。 不过**索引**和**工作目录**可以部分更新，所以会继续进行第 2、3 步。
 
 假如Git的状态为：
 ![path](image/reset_path_init_status.png)
@@ -313,6 +313,14 @@ gitk #打开图形界面
 ![拉取文件的指定版本](image/reset-path3.png)
 
 它其实做了同样的事情，也就是把**索引/暂存区**中的文件恢复到 v1 版本，运行 `git add` 添加它， 然后再将它恢复到 v3 版本（只是不用真的过一遍这些步骤）。 如果我们现在运行 `git commit`，它就会记录一条“将该文件恢复到 v1 版本”的更改， 尽管我们并未在工作目录中真正地再次拥有它。
+
+### 分离头指针（detached HEAD）
+
+本质：我们现在正工作在一个没有分支的状态下。
+
+风险：分离头指针状态下的所有提交，如果最后没有和分支进行挂钩，在切换到其他分支后，会可能被Git当垃圾清理掉。
+
+好处：可以基于某个commit进行修改，提交。
 
 ### Git 存储机制
 
@@ -346,7 +354,90 @@ gitk #打开图形界面
 Git 的分支，其实本质上仅仅是指向`commit对象`的**可变指针**。 Git 的默认分支名字是 master。 在多次提交操作之后，你其实已经有一个指向最后那个提交对象的 master 分支。 master 分支会在每次提交时自动向前移动。
 >Git 的 master 分支并不是一个特殊分支。 它就跟其它分支完全没有区别。 之所以几乎每一个仓库都有 master 分支，是因为 git init 命令默认创建它，并且大多数人都懒得去改动它。
 
-#### 
+#### 分支管理
+
+##### 分支创建
+
+Git 创建新分支，只是为你创建了一个可以移动的新的指针。 比如，创建一个 testing 分支， 你需要使用 git branch 命令：
+
+```shell
+git branch testing
+```
+
+这会在当前所在的commit对象上创建一个指针。
+
+![两个指向相同提交历史的分支](image/two-branches.png)
+
+在 Git 中，`HEAD`是一个特殊指针，它指向当前所在的本地分支（译注：将 `HEAD` 想象为当前分支的别名）。 在本例中，你仍然在 `master` 分支上。 因为 `git branch` 命令仅仅创建 一个新分支，并**不会自动切换**到新分支中去。
+
+![HEAD 指向当前所在的分支](image/head-to-master.png)
+
+使用 git log 命令查看各个分支当前所指的对象。 提供这一功能的参数是 --decorate。
+
+```shell
+$ git log --oneline --decorate
+f30ab (HEAD -> master, testing) add feature #32 - ability to add new formats to the central interface
+34ac2 Fixed bug #1328 - stack overflow under certain conditions
+98ca9 The initial commit of my project
+```
+
+正如你所见，当前 master 和 testing 分支均指向校验和以 f30ab 开头的提交对象。
+
+**创建分支的命令总结**：
+
+```shell
+git branch [new branch name] #在当前所在的commit对象上创建一个分支
+git checkout -b [new branch name]#在当前所在的commit对象上创建一个分支，并切换到创建的新分支
+git branch [new branch name] [commit]# 创建基于commit上的分支
+git checkout -b [new branch name] [branch|commit] # 创建基于分支或提交的分支，并切换到创建的新分支
+```
+
+##### 分支切换
+
+###### `checkout`命令
+
+`checkout` ：和 `reset` 一样，也操纵三棵树。实现切换的功能， 它做了三步基本操作:
+
+1. `checkout`只移动`HEAD`
+2. 更新索引
+3. 更新工作目录
+
+和`reset`命令的区别：
+
+1. `reset` 会移动 `HEAD` 分支的**指向**，而 `checkout` 只会移动 `HEAD` **自身**来指向另一个分支。
+2. `checkout` 对工作目录是安全的，它会通过检查来确保不会将已更改的文件弄丢。 其实它还更聪明一些。它会在工作目录中先试着简单合并一下，这样所有**还未修改过的**文件都会被更新。 而 `reset --hard` 则会不做检查就全面地替换所有东西。
+![reset and checkout](image/reset-checkout.png)
+
+>运行 `checkout` 的另一种方式就是指定一个文件路径，这会像 `reset` 一样不会移动 `HEAD`。 它就像 `git reset [branch] file` 那样用该次提交中的那个文件来更新索引，但是它也会覆盖工作目录中对应的文件。 它就像是 `git reset --hard [branch] file`（如果 `reset` 允许你这样运行的话）， 这样对工作目录并不安全，它也不会移动 `HEAD`。
+
+要切换到一个已存在的分支，你需要使用 git checkout 命令。我们现在切换到新创建的 testing 分支去：
+
+```shell
+git checkout testing
+```
+
+这样 HEAD 就指向 testing 分支了。
+![HEAD 指向当前所在的分支](iamge/../image/head-to-testing.png)
+
+那么，这样的实现方式会给我们带来什么好处呢？ 现在不妨再提交一次：
+
+```shell
+vim test.rb
+git commit -a -m 'made a change'
+```
+
+![HEAD 分支随着提交操作自动向前移动](image/advance-testing.png)
+
+如图所示，你的 `testing` 分支向前移动了，但是 `master` 分支却没有，它仍然指向运行 `git checkout` 时所指的对象。 这就有意思了，现在我们切换回 `master` 分支看看：
+
+```shell
+git checkout master
+```
+
+![checkout时 HEAD 随之移动](image/checkout-master.png)
+
+这条命令做了两件事。 一是使 `HEAD` 指回 `master` 分支，二是将工作目录恢复成 `master` 分支所指向的快照内容。 也就是说，你现在做修改的话，项目将始于一个较旧的版本。 本质上来讲，这就是忽略 testing 分支所做的修改，以便于向另一个方向进行开发。
+
 写文档可以根据章节创建分支，进行编辑
 项目可以根据不同的功能创建分支，进行开发
 修改文档里的公司logo,可根据不同的公司创建不同分支。

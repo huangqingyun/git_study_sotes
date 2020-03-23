@@ -537,13 +537,14 @@ git branch -D iss53 #强制删除为合并的分支
 1. 暂存区恢复成HEAD一样
 
    ```shell
-   git reset HEAD
+   git reset HEAD #恢复全部
+   git reset HEAD -- [<filepath>...] #恢复一个或多个文件
    ```
 
 2. 工作区恢复成暂存区一样
 
    ```shell
-   git checkout -- [<filepath>...]
+   git checkout -- [<filepath>...] #恢复一个或多个文件
    ```
 
 写文档可以根据章节创建分支，进行编辑

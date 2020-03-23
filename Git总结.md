@@ -392,6 +392,17 @@ git branch [new branch name] [commit]# 创建基于commit上的分支
 git checkout -b [new branch name] [branch|commit] # 创建基于分支或提交的分支，并切换到创建的新分支
 ```
 
+##### 分支查看
+
+```shell
+git branch # 不加任何参数运行它，会得到当前所有分支的一个列表
+git branch -v # 查看每一个分支的最后一次提交
+git branch --merged # --merged 与 --no-merged 这两个有用的选项可以过滤这个列表中已经合并或尚未合并到当前分支的分支。
+git branch -a # 列出远程跟踪分支和本地分支。
+```
+
+注意 master 分支前的 * 字符：它代表现在checkout的那一个分支（也就是说，当前 HEAD 指针所指向的分支）。
+
 ##### 分支切换
 
 ###### `checkout`命令
@@ -437,6 +448,60 @@ git checkout master
 ![checkout时 HEAD 随之移动](image/checkout-master.png)
 
 这条命令做了两件事。 一是使 `HEAD` 指回 `master` 分支，二是将工作目录恢复成 `master` 分支所指向的快照内容。 也就是说，你现在做修改的话，项目将始于一个较旧的版本。 本质上来讲，这就是忽略 testing 分支所做的修改，以便于向另一个方向进行开发。
+
+>**分支切换会改变你工作目录中的文件**
+>
+>在切换分支时，一定要注意你工作目录里的文件会被改变。 如果是切换到一个较旧的分支，你的工作目录会恢复到该分支最后一次提交时的样子。 如果 Git 不能干净利落地完成这个任务，它将禁止切换分支。
+
+##### 分支合并
+
+###### `git merge`命令合并分支
+
+例如：合并 iss53 分支到 master 分支
+
+```shell
+git checkout master # 切换到master
+git merge iss53 # 将iss53合并入master分支。
+```
+
+![典型合并中所用到的三个快照](image/basic-merging-1.png)
+
+![合并提交](image/basic-merging-2.png)
+
+修改已经合并进来了，就不再需要 iss53 分支了。 现在你可以在任务追踪系统中关闭此项任务，并删除这个分支。
+
+###### 遇到冲突时的分支合并
+
+两个不同的分支中，对同一个文件的同一个部分进行了不同的修改，Git 就没法处理，哪些是需要保留的。Git 会暂停下来，等待你去解决合并产生的冲突。
+
+任何因包含合并冲突而有待解决的文件，都会以**未合并状态标识**出来。 Git 会在有冲突的文件中加入标准的冲突解决标记，这样你可以打开这些包含冲突的文件然后手动解决冲突。 出现冲突的文件会包含一些特殊区段，看起来像下面这个样子：
+
+```shell
+
+<<<<<<< HEAD:index.html # (当前更改)
+<div id="footer">contact : email.support@github.com</div>
+=======
+<div id="footer">
+ please contact us at support@github.com
+</div>
+>>>>>>> iss53:index.html (传入的更改)
+```
+
+这表示 HEAD 所指示的版本（也就是你的 master 分支所在的位置，因为你在运行 merge 命令的时候已经检出到了这个分支）在这个区段的上半部分（======= 的上半部分），而 iss53 分支所指示的版本在 ======= 的下半部分。
+
+**解决冲突步骤**：
+
+1. 为了解决冲突，你必须选择使用由 ======= 分割的两部分中的一个，或者你也可以自行合并这些内容。
+2. 运行 git status 来确认所有的合并冲突都已被解决
+3. 确定之前有冲突的的文件都已经暂存了，这时你可以输入 git commit 来完成合并提交。
+
+##### 分支删除
+
+```shell
+git branch -d iss53 #删除已经合并的分支
+git branch -D iss53 #强制删除为合并的分支
+
+```
 
 写文档可以根据章节创建分支，进行编辑
 项目可以根据不同的功能创建分支，进行开发

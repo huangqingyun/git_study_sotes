@@ -562,6 +562,52 @@ git branch -D iss53 #强制删除为合并的分支
    git checkout -- [<filepath>...] #恢复一个或多个文件
    ```
 
+### Git 的备份
+
+#### 常用协议
+
+| 常用协议       | 语法格式                                                                                                            | 说明     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------- | -------- |
+| 本地协议（1）  | `/path/to/repo.git`                                                                                                 | 哑协议   |
+| 本地协议（2）  | `file:///path/to/repo.git`                                                                                          | 智能协议 |
+| http/https协议 | <div> `http://git-server.com:port/path/to/repo.git`</div> <div>`https://git-server.com:port/path/to/repo.git`</div> | 智能协议 |
+| ssh协议        | `user@git-server.com:path/to/repo.git `                                                                             | 智能协议 |
+
+>哑协议和智能协议的区别：
+>直观区别：哑协议传输进度不可见，智能协议传输进度可见
+>传输速度：智能协议比哑协议快。
+
+#### 本地备份
+
+##### 备份文件夹操作方式
+
+1. 在本地创建一个备份文件夹
+2. 直接克隆一个要备份的项目到本地仓库
+
+```shell
+
+# 克隆一个没有工作区的裸仓库。window 的路径：E:\folder\.git 转成git 路径为：/e/folder/.git例如：git clone --bare /e/hqy/学习/Git/.git testya.git或者使用智能协议git clone --bare file:///e/hqy/学习/Git/.git testya.git
+
+git remote clone --bare [本地路径] [备份的仓库名字]
+```
+
+##### 项目文件夹操作方式
+
+1. 在本地创建一个备份文件夹
+2. 在项目工作目录操作：
+
+```shell
+git remote -v # 查看远程仓库和本地备份仓库列表
+# git remote add localRep file:///e/GitbackupTest/localRep.git  添加本地仓库
+# git remote add remoteRep https://git-server.com:port/path/to/repo.git  添加远程仓库
+# 添加远程仓库，
+git remote add [备份仓库名] [对应的协议地址]
+# 将数据推送到仓库
+git push [备份仓库名]
+
+```
+
+
 写文档可以根据章节创建分支，进行编辑
 项目可以根据不同的功能创建分支，进行开发
 修改文档里的公司logo,可根据不同的公司创建不同分支。

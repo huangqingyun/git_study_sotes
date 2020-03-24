@@ -176,6 +176,21 @@ git status
    git mv [old file name] [new file name] #一步到位
    ```
 
+### 删除文件
+
+1. 手动更改
+
+   ```shell
+   rm [file name] 
+   git rm [file name] #将暂存区的旧文件删除。
+   ```
+
+2. Git方式
+
+ ```shell
+ git rm [file name]
+```
+
 ### 查看commit版本的演变历史
 
 #### 命令行工具查看

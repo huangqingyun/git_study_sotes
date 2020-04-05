@@ -44,7 +44,7 @@ git config --global --list
 git config --system --list
 ```
 
-## Git 本地版本管理
+## Git 本地仓库版本管理
 
 ### 创建 Git 本地仓库
 
@@ -181,7 +181,7 @@ git status
 1. 手动更改
 
    ```shell
-   rm [file name] 
+   rm [file name]
    git rm [file name] #将暂存区的旧文件删除。
    ```
 
@@ -419,6 +419,12 @@ git branch -a # 列出远程跟踪分支和本地分支。
 
 注意 master 分支前的 * 字符：它代表现在checkout的那一个分支（也就是说，当前 HEAD 指针所指向的分支）。
 
+##### 分支重名名
+
+```shell
+git branch (-m | -M) [oldbranch] <newbranch> # -M是强制移动或重命名。-m 移动分支或重命名
+```
+
 ##### 分支切换
 
 ###### `checkout`命令
@@ -518,6 +524,49 @@ git branch -d iss53 #删除已经合并的分支
 git branch -D iss53 #强制删除为合并的分支
 ```
 
+### 临时保存操作现场
+
+#### 保存操作现场的场景
+
+Git的Commit操作规范
+
+- 建议：功能未开发完成前，不要commit
+- 必须：在没有commit前，不要checkout分支。（例外：不同分支在处在同一个commit阶段，在commit前可以任意切换）
+
+如果当前一个功能没有开发完成，就要切换分到比较紧急（修复Bug等）的其他功能分支进行开发。则需要保存当前开发的现场状态。等紧急的完成后在切换回来恢复现场状态继续开发。
+
+- 保存现场（git stash）
+- 切换分支
+- 恢复现场（git stash apply 或 git stash pop）
+
+#### 保存操作现场的相关命令
+
+##### 保存现场
+
+```shell
+git stash
+```
+
+##### 还原现场
+
+```shell
+git stash pop # 默认还原最近一次，并删除
+git stash apply # 默认还原最近一次，不删除保存的现场状态
+git stash apply stash@{n}  #还原指定的现场。 n为记录最近保存现场的下标。最近的为0，依次递增1.
+```
+
+##### 查看现场
+
+```shell
+git stash list # 查看保存的现场列表
+```
+
+##### 删除现场
+
+```shell
+git stash drop  stash@{n}  #删除指定的现场。 n为记录最近保存现场的下标。最近的为0，依次递增1.
+```
+
 ### 修改commit 的 message
 
 #### 修改最新的commit的message
@@ -575,11 +624,12 @@ git branch -D iss53 #强制删除为合并的分支
 
 >哑协议和智能协议的区别：
 >直观区别：哑协议传输进度不可见，智能协议传输进度可见
+>
 >传输速度：智能协议比哑协议快。
 
 #### 本地备份
 
-##### 备份文件夹操作方式
+##### Clone操作方式
 
 1. 在本地创建一个备份文件夹
 2. 直接克隆一个要备份的项目到本地仓库
@@ -591,7 +641,7 @@ git branch -D iss53 #强制删除为合并的分支
 git remote clone --bare [本地路径] [备份的仓库名字]
 ```
 
-##### 项目文件夹操作方式
+##### Push操作方式
 
 1. 在本地创建一个备份文件夹
 2. 在项目工作目录操作：
@@ -607,7 +657,99 @@ git push [备份仓库名]
 
 ```
 
+## Git 远程仓库版本管理
+
+远程仓库交互图：
+![工作区关系图](image/work_space.png)
+
+### 创建远程仓库（以GitHub为例）
+
+1. ssh协议创建
+
+```shell
+ssh user@host #使用ssh连接主机账号或GitHub帐号
+git init --bare /path/to/repo.git #在/path/to/初始化一个裸(bare)仓库repo.git
+```
+
+1. Web 服务创建
+![创建远程仓库](image/creater_remote_1.png)
+
+![创建远程仓库](image/creater_remote_2.png)
+
+### 删除远程库
+
+1. 进入要仓库
+
+2. 点击仓库 `Settings` 选项
+
+![进入设置](image/repository_del_1.png)
+3. 点击`Delete this repository`按钮进行删除
+
+![进入设置](image/repository_del_2.png)
+![进入设置](image/repository_del_3.png)
+
+### 克隆（Clone） 远程仓库到本地
+
+```shell
+git clone [远程仓库地址]
+```
+
+clone命令做了三个操作：
+
+1. 完整的把远程库下载到本地
+2. 创建 origin 远程地址别名
+3. 初始化本地库
+
+### 创建远程库地址别名
+
+```shell
+git remote -v #查看当前所有远程地址别名
+git remote add [别名] [远程地址]#设置添加远程仓库别名到本地配置
+```
+
+### 本地仓库同步到远程仓库
+
+```shell
+git push [远程仓库别名] [分支名]
+```
+
+### 远程仓库同步到本地仓库
+
+```shell
+git fetch [远程仓库别名] [分支名]
+git pull
+```
+
+### 团队协作开发的工作流程
+
+#### 集中式工作流
+
+
+
+
+
+
+
+
+
+
+### 多人协作冲突（同一分支）
+
+#### 不同人修改不同文件
+
+#### 不同人修改同一文件的不同区域
+
+#### 不同人修改同一文件的同一区域
+
+
+
+
+
+
+
+
+
 
 写文档可以根据章节创建分支，进行编辑
 项目可以根据不同的功能创建分支，进行开发
-修改文档里的公司logo,可根据不同的公司创建不同分支。
+修改文档里的公司logo,可根据不同的公司创建不同分支.

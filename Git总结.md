@@ -725,17 +725,48 @@ git remote -v #查看当前所有远程地址别名
 git remote add [别名] [远程地址]#设置添加远程仓库别名到本地配置
 ```
 
-### 本地仓库同步到远程仓库
+### 本地和远程仓库关联操作
+
+#### 查看所有的本地与远程的分支
 
 ```shell
-git push [远程仓库别名] [分支名]
+git branch -av
 ```
 
-### 远程仓库同步到本地仓库
+#### 本地和远程分支
+
+![### 本地仓库分支和远程仓库分支](image/remote_local.png)
+
+#### 关联本地到远程的分支
+
+本地分支---->远程分支
 
 ```shell
+git push -u [远程仓库别名]  [远程分支] # 关联远程和本地的分支并推送到远程仓库。例：git push -u orgin dev 标识将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
+git puth --set-upstream [远程仓库别名]  [远程分支]# 关联远程和本地的分支并推送到远程仓库。例：git push --set-upstream orgin dev 表示将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
+git push [远程仓库别名] [远程分支] #已经关联的分支，可以直接推送到远程仓库。完整命令是：git push origin [本地分支]:[远程分支]
+```
+
+#### 关联远程到本地的分支
+
+追踪分支----->本地分支
+
+```shell
+git checkout -b [本地分支名] [远程分支名]# 创建一个本地分支，并和追踪分支关联。切换到该分支。
+git checkout -b [本地分支名] --track [远程分支名] #创建一个本地分支，并和追踪分支关联。切换到该分支。
+git checkout --track [远程分支名] #创建一个和追踪分支名字一样的本地分支，并和追踪分支关联。切换到该分支。
 git fetch [远程仓库别名] [分支名]
-git pull
+git pull # 等于 fetch + merger
+         # 完整命令是：git pull origin [本地分支]：[远程分支]相当于git pull + git checkout -b [本地分支名] [远程分支名]
+```
+
+### 删除远程仓库分支
+
+```shell
+git push origin :[分支名]# git push origin [本地分支]:[远程分支名]命令，作用是将本地的远程分支和本地分支同步，所以将本地分支置为 空，即可删除远程分支。
+git push origin --delete [分支名]
+git remote prune origin --dry-run # 查看不需要再追踪的远程分支，即本地有远程追踪的分支，但远程分支已经删除了。
+git remote prune origin #清理远程无效的追踪分支（本地中保存远程的分支）。
 ```
 
 ### 团队协作开发的工作流程

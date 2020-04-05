@@ -657,6 +657,24 @@ git push [备份仓库名]
 
 ```
 
+### Git 标签
+
+标签适用于项目，和具体`branch`无关。
+
+```shell
+git tag # 查看标签
+git tag [tag name] # 在当前HEAD指向的commit上打标签。
+git tag -a [tag name] -m [tag message] # 在当前HEAD指向的commit上打标签，并附加标签信息。
+git tag -d [tag name] # 删除指定的标签
+git tag -l [tag name] # 模糊查询 列：git tag -l 'v2.*' 查询所有以'v2.'开头的所有标签。
+```
+
+### Git 责任人
+
+```shell
+git blame [file] # 查看该文件的所有修改提交的作者。
+```
+
 ## Git 远程仓库版本管理
 
 远程仓库交互图：

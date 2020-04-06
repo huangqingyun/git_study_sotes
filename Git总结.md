@@ -557,7 +557,21 @@ git merge experiment
 >
 >请注意，无论是通过变基，还是通过三方合并，整合的最终结果所指向的快照始终是一样的，只不过提交历史不同罢了。 变基是将一系列提交按照原有次序依次应用到另一分支上，而合并是把最终结果合在一起。
 
-`rebase`其他操作：
+**解决冲突**：
+
+- 方式一：解决冲突
+   1. 为了解决冲突，你必须选择使用由 ======= 分割的两部分中的一个，或者你也可以自行合并这些内容。
+   2. 运行 git status 来确认所有的合并冲突都已被解决
+   3. 确定之前有冲突的的文件都git add 到暂存区。
+   4. git rebase --continue 来继续解决冲突。
+- 方式二：
+   忽略冲突（即放弃rebase 分支的修改，直接使用其他分支。)直接执行`git rebase --skip`。如果所有冲突都忽略了，就相当于把`rebase`分支直接指向目标分支。
+
+   ```shell
+   git rebase --skip
+   ```
+
+**`rebase`其他操作**：
 
 ![从一个主题分支里再分出一个主题分支的提交历史](image/interesting-rebase-1.png)
 
@@ -651,7 +665,6 @@ git stash drop  stash@{n}  #删除指定的现场。 n为记录最近保存现�
 ```shell
   git rebase -i [要修改间隔的commit的最早commit的父commit id] # 交互时，选择'squash'选项，进行合并commit操作。将间隔的commit中选择最早commit为基础commit，然后把其余的commit的操作选项'pick'修改为'squash'，并连续的放到基础commit之后。确定后，即可把其他的commit并入基础commit中。
 ```
-
 
 如果rebase的父commit没有，则选择最早commit，在进行交互时，选择最早的commit的操作为'pick'选项。
 

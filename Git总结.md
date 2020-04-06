@@ -475,10 +475,13 @@ git checkout master
 >
 >在切换分支时，一定要注意你工作目录里的文件会被改变。 如果是切换到一个较旧的分支，你的工作目录会恢复到该分支最后一次提交时的样子。 如果 Git 不能干净利落地完成这个任务，它将禁止切换分支。
 
-##### 分支合并
+##### 整合分支
 
-###### `git merge`命令合并分支
+**Git 中整合来自不同分支的修改主要有两种方法：merge 以及 rebase。**
 
+###### 合并分支
+
+`git merge`命令合并分支。
 例如：合并 iss53 分支到 master 分支
 
 ```shell
@@ -492,7 +495,7 @@ git merge iss53 # 将iss53合并入master分支。
 
 修改已经合并进来了，就不再需要 iss53 分支了。 现在你可以在任务追踪系统中关闭此项任务，并删除这个分支。
 
-###### 遇到冲突时的分支合并
+####### 遇到冲突时的分支合并
 
 两个不同的分支中，对同一个文件的同一个部分进行了不同的修改，Git 就没法处理，哪些是需要保留的。Git 会暂停下来，等待你去解决合并产生的冲突。
 
@@ -515,7 +518,63 @@ git merge iss53 # 将iss53合并入master分支。
 
 1. 为了解决冲突，你必须选择使用由 ======= 分割的两部分中的一个，或者你也可以自行合并这些内容。
 2. 运行 git status 来确认所有的合并冲突都已被解决
-3. 确定之前有冲突的的文件都已经暂存了，这时你可以输入 git commit 来完成合并提交。
+3. 确定之前有冲突的的文件都git add 到暂存区。
+4. git commit 来完成合并提交。
+
+###### 分支变基
+
+![rebase](image/basic-rebase-1.png)
+
+变基（rebase）:如上图，提取在 C4 中引入的补丁和修改，然后在 C3 的基础上应用一次的操作。
+
+使用 `rebase` 命令将`commit`到某一分支上的所有修改都移至另一分支上，就好像“重新播放”一样。
+
+例：检出 experiment 分支，然后将它变基到 master 分支上
+
+```shell
+git checkout experiment
+git rebase master
+
+git rebase <basebranch> <topicbranch>#直接将主题分支 （topicbranch）变基到目标分支（即 basebranch）上。 这样做能省去你先切换到 topicbranch 分支，再对其执行变基命令的多个步骤。
+```
+
+它的原理是首先找到这两个分支（即当前分支 `experiment`、变基操作的目标基底分支 `master`） 的最近共同祖先 `C2`，然后对比当前分支相对于该祖先的历次提交，提取相应的修改并存为临时文件， 然后将当前分支指向目标基底 `C3`, 最后以此将之前另存为临时文件的修改依序应用。`C4`则成为头指针分离状态的`commit`。会被`Git`的垃圾回收机制，清理掉。
+
+![将 C4 中的修改变基到 C3 上](image/basic-rebase-3.png)
+
+现在`master`分支和`experiment`分支可以进行`fast forwoard`合并。
+
+```shell
+git checkout master
+git merge experiment
+```
+
+![master 分支的快进合并](image/basic-rebase-4.png)
+
+>这两种整合方法的最终结果没有任何区别，但是变基使得提交历史更加整洁。 你在查看一个经过变基的分支的历史记录时会发现，尽管实际的开发工作是并行的， 但它们看上去就像是串行的一样，提交历史是一条直线没有分叉。
+>
+>一般我们这样做的目的是为了确保在向远程分支推送时能保持提交历史的整洁——例如向某个其他人维护的项目贡献代码时。 在这种情况下，你首先在自己的分支里进行开发，当开发完成时你需要先将你的代码变基到 origin/master 上，然后再向主项目提交修改。 这样的话，该项目的维护者就不再需要进行整合工作，只需要快进合并便可。
+>
+>请注意，无论是通过变基，还是通过三方合并，整合的最终结果所指向的快照始终是一样的，只不过提交历史不同罢了。 变基是将一系列提交按照原有次序依次应用到另一分支上，而合并是把最终结果合在一起。
+
+`rebase`其他操作：
+
+![从一个主题分支里再分出一个主题分支的提交历史](image/interesting-rebase-1.png)
+
+假设你希望将 `client` 中的修改合并到主分支并发布，但暂时并不想合并 `server` 中的修改， 因为它们还需要经过更全面的测试。这时，你就可以使用 `git rebase` 命令的 `--onto` 选项， 选中在 `client` 分支里但不在 `server` 分支里的修改（即 `C8` 和 `C9`），将它们在 `master` 分支上重放：
+
+```shell
+git rebase --onto master server client
+```
+
+以上命令的意思是：“取出 client 分支，找出它从 server 分支分歧之后的补丁， 然后把这些补丁在 master 分支上重放一遍，让 client 看起来像直接基于 master 修改一样”。
+
+![截取主题分支上的另一个主题分支，然后变基到其他分支](image/interesting-rebase-2.png)
+
+**变基风险：**
+>**遵守一条准则：如果提交存在于你的仓库（即本地仓库）之外，而别人可能基于这些提交进行开发，那么不要执行变基。**
+
+变基操作的实质是丢弃一些现有的提交，然后相应地新建一些内容一样但实际上不同的提交。 如果你已经将提交推送至某个仓库，而其他人也已经从该仓库拉取提交并进行了后续工作，此时，如果你用 git rebase 命令重新整理了提交并再次推送，你的同伴因此将不得不再次将他们手头的工作与你的提交进行整合，如果接下来你还要拉取并整合他们修改过的提交，事情就会变得一团糟。
 
 ##### 分支删除
 
@@ -567,7 +626,7 @@ git stash list # 查看保存的现场列表
 git stash drop  stash@{n}  #删除指定的现场。 n为记录最近保存现场的下标。最近的为0，依次递增1.
 ```
 
-### 修改commit 的 message
+### 整理commit 的 message
 
 #### 修改最新的commit的message
 
@@ -578,8 +637,36 @@ git stash drop  stash@{n}  #删除指定的现场。 n为记录最近保存现�
 #### 修改历史的commit的message
   
   ```shell
-  git rebase -i [commit] # 交互
+  git rebase -i [要修改的commit的父commit id] # 交互时，选择'reword'选项，进行编辑commit message操作。即将'pick'修改为'reword'
   ```
+
+#### 连续多个commit的message整理成一个
+
+```shell
+  git rebase -i [要修改的commit的父commit id] # 交互时，选择'reword'选项，进行编辑commit message操作。即将'pick'修改为'reword'
+```
+
+#### 间隔的几个commit的message整理成一个
+
+```shell
+  git rebase -i [要修改间隔的commit的最早commit的父commit id] # 交互时，选择'squash'选项，进行合并commit操作。将间隔的commit中选择最早commit为基础commit，然后把其余的commit的操作选项'pick'修改为'squash'，并连续的放到基础commit之后。确定后，即可把其他的commit并入基础commit中。
+```
+
+
+如果rebase的父commit没有，则选择最早commit，在进行交互时，选择最早的commit的操作为'pick'选项。
+
+### 挑选commit
+
+常见使用场景：
+
+- 发现已提交的修改，写到错误的branch上，需要将这些commit挑拣到正确的分支上。
+- 在已有的分支上，需要功能或修改在其他分支已经修改好并提交，这时只需要将其他分支已经完成的commit挑拣到自己所在的分支。
+
+使用cherry-pick命令，挑选commit。挑拣是复制操作，复制commit内容，在目标分支上生成一个新的commit。
+
+```shell
+git cherry-pick [目标 commit id]# 将目标commit挑拣到当前分支，并将当前分支的HEAD指向移到目标commit。
+```
 
 ### 比较文件差异
 
@@ -663,6 +750,7 @@ git push [备份仓库名]
 
 ```shell
 git tag # 查看标签
+git show [tag name]#查看标签详细信息。
 git tag [tag name] # 在当前HEAD指向的commit上打标签。
 git tag -a [tag name] -m [tag message] # 在当前HEAD指向的commit上打标签，并附加标签信息。
 git tag -d [tag name] # 删除指定的标签
@@ -769,18 +857,34 @@ git remote prune origin --dry-run # 查看不需要再追踪的远程分支，�
 git remote prune origin #清理远程无效的追踪分支（本地中保存远程的分支）。
 ```
 
+### 远程标签
+
+#### 推送标签
+
+```shell
+git push origin [tag name ...] # 推送远程标签到远程仓库
+# 完整写法：git push origin [要推送的tag]:[目标tag]
+git push origin --tags # 推送本地所有标签到远程仓库。
+```
+
+#### 拉取远程标签
+
+```shell
+git pull # 拉去所有分支和标签
+git fetch origin tag [tag name] # 只拉取指定标签
+```
+
+#### 删除远程标签
+
+```shell
+git push origin :[目标tag] #删除目标tag
+
+```
+
+
 ### 团队协作开发的工作流程
 
 #### 集中式工作流
-
-
-
-
-
-
-
-
-
 
 ### 多人协作冲突（同一分支）
 

@@ -22,18 +22,21 @@
 
    ```shell
    git config --local [配置项] [配置值]
+   git config --local --add [配置项] [配置值]
    ```
 
 - 对当前登录用户的所有仓库有效
 
    ```shell
    git config --global [配置项] [配置值]
+    git config --global --add [配置项] [配置值]
    ```
 
 - 系统所有登录的用户有效
 
    ```shell
    git config --system [配置项] [配置值]
+   git config --system --add [配置项] [配置值]
    ```
 
 ### 显示配置信息，加 --list
@@ -795,6 +798,25 @@ git init --bare /path/to/repo.git #在/path/to/初始化一个裸(bare)仓库rep
 
 ![创建远程仓库](image/creater_remote_2.png)
 
+### 创建远程库地址别名
+
+```shell
+git remote -v #查看当前所有远程地址别名
+git remote add [别名] [远程地址]#设置添加远程仓库别名到本地配置
+```
+
+### 克隆（Clone）远程仓库到本地
+
+```shell
+git clone [远程仓库地址或别名] # 克隆远程仓库到本地
+```
+
+clone命令做了三个操作：
+
+1. 完整的把远程库下载到本地
+2. 创建 origin 远程地址别名
+3. 初始化本地库
+
 ### 删除远程库
 
 1. 进入要仓库
@@ -806,25 +828,6 @@ git init --bare /path/to/repo.git #在/path/to/初始化一个裸(bare)仓库rep
 
 ![进入设置](image/repository_del_2.png)
 ![进入设置](image/repository_del_3.png)
-
-### 克隆（Clone） 远程仓库到本地
-
-```shell
-git clone [远程仓库地址]
-```
-
-clone命令做了三个操作：
-
-1. 完整的把远程库下载到本地
-2. 创建 origin 远程地址别名
-3. 初始化本地库
-
-### 创建远程库地址别名
-
-```shell
-git remote -v #查看当前所有远程地址别名
-git remote add [别名] [远程地址]#设置添加远程仓库别名到本地配置
-```
 
 ### 本地和远程仓库关联操作
 
@@ -853,11 +856,11 @@ git push [远程仓库别名] [远程分支] #已经关联的分支，可以直�
 追踪分支----->本地分支
 
 ```shell
-git checkout -b [本地分支名] [远程分支名]# 创建一个本地分支，并和追踪分支关联。切换到该分支。
+git checkout -b [本地分支名] [远程分支名]# 创建一个基于远程分支的本地分支，并切换到该分支。或者可以理解为创建一个本地分支，并和追踪分支关联。切换到该分支。
 git checkout -b [本地分支名] --track [远程分支名] #创建一个本地分支，并和追踪分支关联。切换到该分支。
 git checkout --track [远程分支名] #创建一个和追踪分支名字一样的本地分支，并和追踪分支关联。切换到该分支。
-git fetch [远程仓库别名] [分支名]
-git pull # 等于 fetch + merger
+git fetch [远程仓库别名] [分支名] # 拉取远程的分支
+git pull # 等于 fetch + merger，即：拉取远程分支，合并本地和远程分支。
          # 完整命令是：git pull origin [本地分支]：[远程分支]相当于git pull + git checkout -b [本地分支名] [远程分支名]
 ```
 
@@ -883,34 +886,40 @@ git push origin --tags # 推送本地所有标签到远程仓库。
 #### 拉取远程标签
 
 ```shell
-git pull # 拉去所有分支和标签
+git pull # 拉取所有分支和标签
 git fetch origin tag [tag name] # 只拉取指定标签
 ```
 
 #### 删除远程标签
 
 ```shell
-git push origin :[目标tag] #删除目标tag
-
+git push origin :[目标tag] # 删除目标tag
 ```
 
+### 多人协作冲突解决（同一分支）
+
+#### 基本步骤
+
+1. `git push` 操作报冲突，即：远程分支和本地分支处于non fast forwoard。
+2. `git pull` 拉取远程分支到本地，尝试自动将远程分支合并到本地分支。此步骤也可分开操作，先`git fetch`拉取远程分支，手动合并（等于第3步骤）。
+3. 无法自动合并，需要人工解决（基本需要和冲突的提交人进行沟通解决）。
+4. 完成合并后，远程分支和本地分支处于fast forwoard。然后`git push`到远程仓库。
+
+#### 冲突产生的原因
+
+1. 不同人修改不同文件
+
+2. 不同人修改同一文件的不同区域
+
+3. 不同人修改同一文件的同一区域
+
+4. 同时修改了文件名和文件内容
+
+5. 把同一文件改成了不同的文件名
 
 ### 团队协作开发的工作流程
 
 #### 集中式工作流
-
-### 多人协作冲突（同一分支）
-
-#### 不同人修改不同文件
-
-#### 不同人修改同一文件的不同区域
-
-#### 不同人修改同一文件的同一区域
-
-
-
-
-
 
 
 

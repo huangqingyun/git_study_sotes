@@ -732,6 +732,7 @@ git cherry-pick [目标 commit id]# 将目标commit挑拣到当前分支，并�
 | http/https协议 | <div>`http://git-server.com:port/path/to/repo.git`</div> <div>`https://git-server.com:port/path/to/repo.git`</div> | 智能协议 |
 | ssh协议        | `user@git-server.com:path/to/repo.git`                                                                             | 智能协议 |
 
+>协议中的path 使用Git Bash 中的显示的路径。
 >哑协议和智能协议的区别：
 >直观区别：哑协议传输进度不可见，智能协议传输进度可见
 >
@@ -805,7 +806,7 @@ git init --bare /path/to/repo.git #在/path/to/初始化一个裸(bare)仓库rep
 
 ![创建远程仓库](image/creater_remote_2.png)
 
-### 创建远程库地址别名
+### 添加并设置远程库地址别名
 
 ```shell
 git remote -v #查看当前所有远程地址别名
@@ -821,7 +822,7 @@ git clone [远程仓库地址或别名] # 克隆远程仓库到本地
 clone命令做了三个操作：
 
 1. 完整的把远程库下载到本地
-2. 创建 origin 远程地址别名
+2. 添加并设置`origin`为**远程地址仓库地址**别名
 3. 初始化本地库
 
 ### 删除远程库
@@ -838,6 +839,122 @@ clone命令做了三个操作：
 
 ### 本地和远程仓库关联操作
 
+#### 查看远程仓库
+
+```shell
+git remote show origin # 命令列出了当你在特定的分支上执行 git push 会自动地推送到哪一个远程分支。 它也同样地列出了哪些远程分支不在你的本地，哪些远程分支已经从服务器上移除了， 还有当你执行 git pull 时哪些本地分支可以与它跟踪的远程分支自动合并。
+```
+
+#### 引用规范(关联机制)
+
+##### `fetch`引用规范
+
+我们从添加一个远程仓库说起，例：
+
+```shell
+git remote add origin https://github.com/schacon/simplegit-progit
+```
+
+运行上述命令会在仓库里`.git/config`文件中添加一节，并配置指定远程仓库名称为`origin`、`URL`和拉取操作的**refspec(引用规范)**:
+
+```shell
+[remote "origin"]
+   url = https://github.com/schacon/simplegit-progit
+   fetch = +refs/heads/*:refs/remotes/origin/*
+```
+
+格式由一个**可选的** + 号和紧随其后的 `<src>:<dst>` 组成， 其中 `<src>` 代表`source`(来源)，即远程版本库中的引用； `<dst>`代表`destination`(目的地) 是本地跟踪的远程引用的位置。 + 号告诉`Git`即使在不能Fast Forward（快进）的情况下也要（强制）更新引用。
+
+默认情况下，引用规范由`git remote add origin`命令自动生成，`Git`获取服务器中`refs/heads/`下面的所有引用，并将它写入到本地的`refs/remotes/origin/`中。 所以，如果服务器上有一个`master`分支，你可以在本地通过下面任意一种方式来访问该分支上的提交记录：
+
+```shell
+git log origin/master
+git log remotes/origin/master
+git log refs/remotes/origin/master
+```
+
+上面的三个命令作用相同，因为`Git`会把它们都扩展成 `refs/remotes/origin/master`。
+
+想让 Git 每次只拉取远程的 master 分支，而不是所有分支， 可以把（引用规范的）获取那一行修改为只引用该分支：
+
+```shell
+# 修改`.git/config`文件。
+fetch = +refs/heads/master:refs/remote/origin/master
+```
+
+针对该远程版本库的`git fetch`操作的默认引用规范。即，使用`git fetch`命令默认拉取远程仓库的`master`分支。如果希望被执行一次的操作，我们也可以在命令行指定引用规范。 例，要将远程的 master 分支拉到本地的 origin/mymaster 分支，可以运行：
+
+```shell
+# 修改`.git/config`文件。
+git fetch origin master:refs/remote/origin/mymaster
+```
+
+也可以指定多个引用规范。 在命令行中，你可以按照如下的方式拉取多个分支：
+
+```shell
+git fetch origin master:refs/remotes/origin/mymaster \
+   topic:refs/remotes/origin/topic
+```
+
+这个例子中，对`master`分支的拉取操作被拒绝，因为它不是一个可以Fast Forward(快进)的引用。 我们可以通过在引用规范之前指定`+`号来覆盖该规则。
+
+在配置文件中指定多个用于`fetch`操作的引用规范。 如果想在每次从`origin`远程仓库`fetch`时都包括`master`和`experiment`分支，添加如下两行：
+
+```shell
+[remote "origin"]
+   url = https://github.com/schacon/simplegit-progit
+   fetch = +refs/heads/master:refs/remotes/origin/master
+   fetch = +refs/heads/experiment:refs/remotes/origin/experiment
+```
+
+ 假设你有一个 QA 团队，他们推送了一系列分支，同时你只想要获取 master 和 QA 团队的所有分支而不关心其他任何分支，那么可以使用如下配置：
+
+```shell
+[remote "origin"]
+   url = https://github.com/schacon/simplegit-progit
+   fetch = +refs/heads/master:refs/remotes/origin/master
+   fetch = +refs/heads/qa/*:refs/remotes/origin/qa/*
+```
+
+如果项目的工作流很复杂，有`QA`团队推送分支、开发人员推送分支、集成团队推送并且在远程分支上展开协作，你就可以像这样（在本地）为这些分支创建各自的命名空间，非常方便。
+
+##### `push`引用规范
+
+上面这样从远程版本库`fetch`已在命名空间中的引用当然很棒，但`QA`团队最初应该如何将他们的分支放入远程的`qa/`命名空间呢？ 我们可以通过引用规范`push`来完成这个任务。
+
+如果 QA 团队想把他们的 master 分支推送到远程服务器的 qa/master 分支上，可以运行：
+
+```shell
+git push origin master:refs/heads/qa/master
+```
+
+如果他们希望`Git`每次运行`git push origin`时都像上面这样推送，可以在他们的配置文件中添加一条 push 值：
+
+```shell
+[remote "origin"]
+   url = https://github.com/schacon/simplegit-progit
+   fetch = +refs/heads/*:refs/remotes/origin/*
+   push = refs/heads/master:refs/heads/qa/master
+```
+
+正如刚才所指出的，这会让`git push origin`默认把本地`master`分支推送到远程 qa/master 分支。
+
+##### 删除引用规范
+
+你还可以借助类似下面的命令通过引用规范从**远程服务器**上删除引用：
+
+```shell
+git push origin :topic
+```
+
+因为引用规范（的格式）是`<src>:<dst>`，所以上述命令把`<src>`留空，意味着把远程版本库的`topic`分支定义为空值，也就是删除它。
+
+或者你可以使用更新的语法（自 Git v1.7.0 以后可用）：
+
+```shell
+git push origin --delete topic
+```
+
 #### 查看所有的本地与远程的分支
 
 ```shell
@@ -846,29 +963,30 @@ git branch -av
 
 #### 本地和远程分支
 
-![### 本地仓库分支和远程仓库分支](image/remote_local.png)
+![### 本地仓库和远程仓库分支](image/remote_local.png)
 
-#### 关联本地到远程的分支
-
-本地分支---->远程分支
+#### `Push`到远程的分支
 
 ```shell
-git push -u [远程仓库别名]  [远程分支] # 关联远程和本地的分支并推送到远程仓库。例：git push -u orgin dev 标识将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
+git push #工作方式类似于git push <remote>，其中<remote>是当前分支的远程分支(如果没有为当前分支配置远程，则为origin)。
+git push origin # 如果没有其他配置，则将当前分支推到已配置的上游
+git push origin HEAD # 将当前分支推到远程上相同名称的分支。
+git push origin HEAD:master #将当前分支推到“origin”存储库中与“master”匹配的远程分支引用。
+git push origin master:refs/heads/experimental #通过复制当前主分支，在origin存储库中创建experimental的分支。当本地名称和远程名称不同时，只需要在远程存储库中创建新的分支或标记;否则，使用ref名称本身。
+git push -u [远程仓库别名] [远程分支] # 关联远程和本地的分支并推送到远程仓库。例：git push -u orgin dev 标识将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
 git puth --set-upstream [远程仓库别名]  [远程分支]# 关联远程和本地的分支并推送到远程仓库。例：git push --set-upstream orgin dev 表示将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
 git push [远程仓库别名] [远程分支] #已经关联的分支，可以直接推送到远程仓库。完整命令是：git push origin [本地分支]:[远程分支]
 ```
 
-#### 关联远程到本地的分支
-
-追踪分支----->本地分支
+#### `fetch`到本地的分支
 
 ```shell
-git checkout -b [本地分支名] [远程分支名]# 创建一个基于远程分支的本地分支，并切换到该分支。或者可以理解为创建一个本地分支，并和追踪分支关联。切换到该分支。
-git checkout -b [本地分支名] --track [远程分支名] #创建一个本地分支，并和追踪分支关联。切换到该分支。
-git checkout --track [远程分支名] #创建一个和追踪分支名字一样的本地分支，并和追踪分支关联。切换到该分支。
 git fetch [远程仓库别名] [分支名] # 拉取远程的分支
 git pull # 等于 fetch + merger，即：拉取远程分支，合并本地和远程分支。
          # 完整命令是：git pull origin [本地分支]：[远程分支]相当于git pull + git checkout -b [本地分支名] [远程分支名]
+git checkout -b [本地分支名] [远程分支名]# 创建一个基于远程分支的本地分支，并切换到该分支。或者可以理解为创建一个本地分支，并和追踪分支关联。切换到该分支。
+git checkout -b [本地分支名] --track [远程分支名] #创建一个本地分支，并和追踪分支关联。切换到该分支。
+git checkout --track [远程分支名] #创建一个和追踪分支名字一样的本地分支，并和追踪分支关联。切换到该分支。
 ```
 
 ### 删除远程仓库分支

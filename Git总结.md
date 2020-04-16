@@ -21,22 +21,22 @@
 - 只对配置的当前仓库有效
 
    ```shell
-   git config --local [配置项] [配置值]
-   git config --local --add [配置项] [配置值]
+   git config --local <配置项> <配置值>
+   git config --local --add <配置项> <配置值>
    ```
 
 - 对当前登录用户的所有仓库有效
 
    ```shell
-   git config --global [配置项] [配置值]
-    git config --global --add [配置项] [配置值]
+   git config --global <配置项> <配置值>
+    git config --global --add <配置项> <配置值>
    ```
 
 - 系统所有登录的用户有效
 
    ```shell
-   git config --system [配置项] [配置值]
-   git config --system --add [配置项] [配置值]
+   git config --system <配置项> <配置值>
+   git config --system --add <配置项> <配置值>
    ```
 
 ### 显示配置信息，加 --list
@@ -154,9 +154,9 @@ Git 作为一个系统，是以它的一般操作来管理并操纵这三棵**�
 
 ```shell
 git status # 查看工作区和暂存区的文件状态
-cp [path] [file name] #拷贝文件到本地或GUI方式新建文件
+cp <path> <file name> #拷贝文件到本地或GUI方式新建文件
 git status #查看上一步创建或拷贝的文件状态。
-git add [file name] #将文件添加到暂存区或者使用 git add -u 将工作区的所有跟踪的文件提交到暂存区。
+git add <file name> #将文件添加到暂存区或者使用 git add -u 将工作区的所有跟踪的文件提交到暂存区。
 git status
 git commit -m 'message' #将暂存区的所有文件的更改提交到版本库，或者使用git commit -m 'message' [file name...]指定一个或多个文件提交
 git status
@@ -168,15 +168,15 @@ git status
 1. 手动更改
 
    ```shell
-   mv [old file name] [new file name] #或者使用GUI方式修改
-   git add [new file name] # 将修改后的文件添加到暂存区
-   git rm [old file name] #将暂存区的旧文件删除。
+   mv <old file name> <new file name> #或者使用GUI方式修改
+   git add <new file name> # 将修改后的文件添加到暂存区
+   git rm <old file name> #将暂存区的旧文件删除。
    ```
 
 2. Git方式
 
    ```shell
-   git mv [old file name] [new file name] #一步到位
+   git mv <old file name> <new file name> #一步到位
    ```
 
 ### 删除文件
@@ -184,17 +184,17 @@ git status
 1. 手动更改
 
    ```shell
-   rm [file name]
-   git rm [file name] #将暂存区的旧文件删除。
+   rm <file name>
+   git rm <file name> #将暂存区的旧文件删除。
    ```
 
 2. Git方式
 
  ```shell
- git rm [file name]
+ git rm <file name>
  git rm log/\*.log # 该命令删除log目录下的所有以 `.log` 结尾的文件
  git rm \*~ # 删除所有以`~`结尾的文件
- git rm --cached [file name] # 从暂存区删除文件。
+ git rm --cached <file name> # 从暂存区删除文件。
                             # 比如：当你忘记添加 .gitignore 文件，不小心把一个很大
                             # 的日志文件或一堆 .a 这样的编译生成文件添加到暂存区时，
                             # 这一做法尤其有用。
@@ -216,11 +216,13 @@ git log --oneline #简洁模式查看
 git log -n2 #查看最近的2次版本演变历史
 git log -n4 --oneline #简洁模式查看最近的4次版本演变历史
 git branch -v # 查看分支。或者使用 git branch -av查看所有分支
+git branch -vv # 查看所有远程和本地分支，及远程跟踪分支详情。
 git log --all #查看所有分支的当前所在版本演变历史。
 git log --all --graph # 图形化方式的查看所有分支的版本演变历史。
+git show [sha1值|分支名] # 查看commit 详细。
 git reflog # 查看当前分支，所有版本演变历史。HEAD@{移动到当前版本需要多少步}
 # git log --前缀的参数可以组合使用
-git --help --web [command name] #使用网页方式查看命令详细帮助
+git --help --web <command name> #使用网页方式查看命令详细帮助
 ```
 
 #### 图形界面工具查看
@@ -309,7 +311,7 @@ gitk #打开图形界面
   >2. 回滚版本和撤销某节点后的所有commit:有时某节点到原节点之间的commit提交都是错了，或者是某一版本之后出现未知Bug,导致无法使用。
   >
   >```shell
-  >   git reset --hard [标识commit的哈希值] # 回滚到指定commit
+  >   git reset --hard <标识commit的哈希值> # 回滚到指定commit
   >   git reset --hard HEAD^ # 注：一个^表示回滚一个commit，n 个表示回滚n个commit
   >   git reset --hard HEAD~n # 注：表示回滚n个commit
   >   ```
@@ -466,7 +468,7 @@ git checkout testing
 
 ```shell
 vim test.rb
-git commit -a -m 'made a change'
+git commit -a -m 'made a change' # 同git commit -am 'made a change' 一样
 ```
 
 ![HEAD 分支随着提交操作自动向前移动](image/advance-testing.png)
@@ -479,11 +481,11 @@ git checkout master
 
 ![checkout时 HEAD 随之移动](image/checkout-master.png)
 
-这条命令做了两件事。 一是使 `HEAD` 指回 `master` 分支，二是将工作目录恢复成 `master` 分支所指向的快照内容。 也就是说，你现在做修改的话，项目将始于一个较旧的版本。 本质上来讲，这就是忽略 testing 分支所做的修改，以便于向另一个方向进行开发。
+这条命令做了两件事。 一是使 `HEAD` 指回 `master` 分支，二是将工作目录恢复成 `master` 分支所指向的快照内容。 也就是说，你现在做修改的话，项目将始于一个较旧的版本。 本质上来讲，这就是忽略`testing`分支所做的修改，以便于向另一个方向进行开发。
 
 >**分支切换会改变你工作目录中的文件**
 >
->在切换分支时，一定要注意你工作目录里的文件会被改变。 如果是切换到一个较旧的分支，你的工作目录会恢复到该分支最后一次提交时的样子。 如果 Git 不能干净利落地完成这个任务，它将禁止切换分支。
+>在切换分支时，一定要注意你工作目录里的文件会被改变。 如果是切换到一个较旧的分支，你的工作目录会恢复到该分支最后一次提交时的样子。 如果`Git`不能干净利落地完成这个任务，它将禁止切换分支。
 
 ##### 整合分支
 
@@ -824,6 +826,9 @@ clone命令做了三个操作：
 1. 完整的把远程库下载到本地
 2. 添加并设置`origin`为**远程地址仓库地址**别名
 3. 初始化本地库
+4. 创建本地的`master`分支，并设置为跟踪远程的`origin/master`分支的**跟踪分支**
+
+>跟踪分支:基于**远程跟踪分支**`checkout`一个本地分支，会自动创建所谓的“跟踪分支”（它跟踪的分支叫做“upstream branch”）。 跟踪分支是与远程分支有直接关系的本地分支。
 
 ### 删除远程库
 
@@ -845,7 +850,11 @@ clone命令做了三个操作：
 git remote show origin # 命令列出了当你在特定的分支上执行 git push 会自动地推送到哪一个远程分支。 它也同样地列出了哪些远程分支不在你的本地，哪些远程分支已经从服务器上移除了， 还有当你执行 git pull 时哪些本地分支可以与它跟踪的远程分支自动合并。
 ```
 
-#### 引用规范(关联机制)
+#### 引用规范(refspec)
+
+格式: `[+] <src>:<dst>`
+
+由一个**可选的** + 号和紧随其后的 `<src>:<dst>` 组成， 其中 `<src>` 代表`source`(来源)； `<dst>`代表`destination`(目的地) 。 + 号告诉`Git`即使在不能Fast Forward（快进）的情况下也要（强制）更新引用。
 
 ##### `fetch`引用规范
 
@@ -882,7 +891,7 @@ git log refs/remotes/origin/master
 fetch = +refs/heads/master:refs/remote/origin/master
 ```
 
-针对该远程版本库的`git fetch`操作的默认引用规范。即，使用`git fetch`命令默认拉取远程仓库的`master`分支。如果希望被执行一次的操作，我们也可以在命令行指定引用规范。 例，要将远程的 master 分支拉到本地的 origin/mymaster 分支，可以运行：
+针对该远程版本库的`git fetch`操作的默认引用规范。即，使用`git fetch`命令默认拉取远程仓库的`master`分支。如果希望被执行一次的操作，我们也可以在命令行指定引用规范。例，要将远程的 master 分支拉到本地的 origin/mymaster 分支，可以运行：
 
 ```shell
 # 修改`.git/config`文件。
@@ -892,8 +901,7 @@ git fetch origin master:refs/remote/origin/mymaster
 也可以指定多个引用规范。 在命令行中，你可以按照如下的方式拉取多个分支：
 
 ```shell
-git fetch origin master:refs/remotes/origin/mymaster \
-   topic:refs/remotes/origin/topic
+git fetch origin master:refs/remotes/origin/mymaster topic:refs/remotes/origin/topic
 ```
 
 这个例子中，对`master`分支的拉取操作被拒绝，因为它不是一个可以Fast Forward(快进)的引用。 我们可以通过在引用规范之前指定`+`号来覆盖该规则。
@@ -961,32 +969,147 @@ git push origin --delete topic
 git branch -av
 ```
 
-#### 本地和远程分支
+#### 本地、远程、远程跟踪分支
 
 ![### 本地仓库和远程仓库分支](image/remote_local.png)
 
-#### `Push`到远程的分支
+##### 远程分支
+
+远程引用是对远程仓库的引用（指针），包括分支、标签等等。 你可以通过`git ls-remote <remote>`来显式地获得远程引用的完整列表， 或者通过`git remote show <remote>`获得远程分支的更多信息。然而，一个更常见的做法是利用**远程跟踪分支**。
+
+##### 远程跟踪分支
+
+远程跟踪分支是远程分支状态的引用。它们是你无法移动的本地引用。一旦你进行了网络通信， `Git`就会为你移动它们以精确反映远程仓库的状态。请将它们看做书签，这样可以提醒你该分支在远程仓库中的位置就是你最后一次连接到它们的位置。
+
+它们以`<remote>/<branch>`的形式命名。 例如，如果你想要看你最后一次与远程仓库`origin`通信时`master`分支的状态，你可以查看`origin/master`分支。 你与同事合作解决一个问题并且他们推送了一个`iss53`分支，你可能有自己的本地`iss53`分支， 然而在服务器上的分支会以`origin/iss53`来表示。
+
+这可能有一点儿难以理解，让我们来看一个例子。 假设你的网络里有一个在`git.ourcompany.com`的`Git`服务器。 如果你从这里克隆，`Git`的`clone`命令会为你自动将其命名为`origin`，拉取它的所有数据， 创建一个指向它的`master`分支的指针，并且在本地将其命名为`origin/master`。 `Git`也会给你一个与`origin`的`master`分支在指向同一个地方的本地`master`分支，这样你就有工作的基础。
+
+![克隆之后的远程仓库与本地仓库](image/remote-branches-1.png)
+
+如果你在本地的`master`分支做了一些工作，在同一段时间内有其他人推送提交到`git.ourcompany.com`并且更新了它的`master`分支，这就是说你们的提交历史已走向不同的方向。 即便这样，只要你保持不与`origin`服务器连接（并拉取数据），你的`origin/master`指针就不会移动。
+
+![本地与远程的工作可以分叉](image/remote-branches-2.png)
+
+如果要与给定的远程仓库同步数据，运行`git fetch <remote>`命令（在本例中为`git fetch origin`）。 这个命令查找 “origin” 是哪一个服务器（在本例中，它是`git.ourcompany.com`）， 从中抓取本地没有的数据，并且更新本地数据库，移动`origin/master`指针到更新之后的位置。
+
+![git fetch 更新你的远程跟踪分支](image/remote-branches-3.png)
+
+为了演示有多个远程仓库与远程分支的情况，我们假定你有另一个内部`Git`服务器，仅服务于你的某个敏捷开发团队。 这个服务器位于`git.team1.ourcompany.com`。 你可以运行`git remote add`命令添加一个新的远程仓库引用到当前的项目，将这个远程仓库命名为`teamone`，将其作为完整`URL`的别名或缩写。
+
+![添加另一个仓库](image/remote-branches-4.png)
+
+现在，可以运行`git fetch teamone`来抓取远程仓库`teamone`有而本地没有的数据。 因为那台服务器上现有的数据是`origin`远程仓库上的一个子集， 所以`Git`并不会抓取数据而是会设置远程跟踪分支`teamone/master`指向`teamone`的`master`分支。
+
+![远程跟踪分支 teamone/master](image/remote-branches-5.png)
+
+###### `push`
+
+当你想要公开分享一个分支时，需要将其推送到有写入权限的远程仓库上。本地的分支并不会自动与远程仓库同步——你必须显式地推送想要分享的分支。这样，你就可以把不愿意分享的内容放到私人分支上，而将需要和别人协作的内容推送到公开分支。
+
+如果希望和别人一起在名为`serverfix`的分支上工作，你可以像推送第一个分支那样推送它。 运行`git push <remote> <branch>`.
+这里有些工作被简化了。`Git`自动将`serverfix`分支名字展开为 `refs/heads/serverfix:refs/heads/serverfix`，那意味着，“推送本地的`serverfix`分支来更新远程仓库上的`serverfix`分支。” 我们将会详细学习`Git`内部原理的 `refs/heads/`部分， 但是现在可以先把它放在儿。你也可以运行`git push origin serverfix:serverfix`， 它会做同样的事——也就是说“推送本地的`serverfix`分支，将其作为远程仓库的`serverfix` 分支” 可以通过这种格式来推送本地分支到一个命名不相同的远程分支。 如果并不想让远程仓库上的分支叫做 `serverfix`，可以运行`git push origin serverfix:awesomebranch`来将本地的`serverfix`分支推送到远程仓库上的`awesomebranch`分支。
+
+下一次其他协作者从服务器上抓取数据时，他们会在本地生成一个远程分支`origin/serverfix`，指向服务器的`serverfix`分支的引用。
+
+要特别注意的一点是当抓取到新的远程跟踪分支时，本地不会自动生成一份可编辑的副本（拷贝）。换一句话说，这种情况下，不会有一个新的`serverfix`分支——只有一个不可以修改的`origin/serverfix`指针。
+
+可以运行`git merge origin/serverfix`将这些工作合并到当前所在的分支。 如果想要在自己的`serverfix`分支上工作，可以将其建立在远程跟踪分支之上：
 
 ```shell
-git push #工作方式类似于git push <remote>，其中<remote>是当前分支的远程分支(如果没有为当前分支配置远程，则为origin)。
-git push origin # 如果没有其他配置，则将当前分支推到已配置的上游
-git push origin HEAD # 将当前分支推到远程上相同名称的分支。
-git push origin HEAD:master #将当前分支推到“origin”存储库中与“master”匹配的远程分支引用。
-git push origin master:refs/heads/experimental #通过复制当前主分支，在origin存储库中创建experimental的分支。当本地名称和远程名称不同时，只需要在远程存储库中创建新的分支或标记;否则，使用ref名称本身。
-git push -u [远程仓库别名] [远程分支] # 关联远程和本地的分支并推送到远程仓库。例：git push -u orgin dev 标识将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
-git puth --set-upstream [远程仓库别名]  [远程分支]# 关联远程和本地的分支并推送到远程仓库。例：git push --set-upstream orgin dev 表示将本地当前所在的分支关联到远程的dev分支，并推送到远程仓库
-git push [远程仓库别名] [远程分支] #已经关联的分支，可以直接推送到远程仓库。完整命令是：git push origin [本地分支]:[远程分支]
+git checkout -b serverfix origin/serverfix
 ```
 
-#### `fetch`到本地的分支
+这会给你一个用于工作的本地分支，并且起点位于 origin/serverfix。
+
+###### 跟踪分支
+
+从一个**远程跟踪分支**`checkout`一个**本地分支**会自动创建所谓的“跟踪分支”（它跟踪的分支叫做`upstream branch`（上游分支）”，即**远程跟踪分支**）。 跟踪分支是与远程分支有直接关系的本地分支。 如果在一个跟踪分支上输入`git pull`，`Git`能自动地识别去哪个服务器上抓取、合并到哪个分支。
+
+当克隆一个仓库时，它通常会自动地创建一个跟踪`origin/master`的`master`分支。 然而，如果你愿意的话可以设置其他的跟踪分支，或是一个在其他远程仓库上的跟踪分支，又或者不跟踪`master`分支。 最简单的实例就是像之前看到的那样，运行`git checkout -b <branch> <remote>/<branch>`。 这是一个十分常用的操作所以 `Git`提供了`--track`快捷方式：
 
 ```shell
-git fetch [远程仓库别名] [分支名] # 拉取远程的分支
+git checkout --track origin/serverfix
+```
+
+由于这个操作太常用了，该捷径本身还有一个捷径。如果您尝试`checkout`的分支名称(a)不存在，且仅与一个远程仓库上的(b)名称完全匹配，那么`Git`就会为你创建一个跟踪分支：
+
+```shell
+git checkout serverfix
+```
+
+如果想要将本地分支与远程分支设置为不同的名字，你可以轻松地使用上一个命令增加一个不同名字的本地分支：
+
+```shell
+git checkout -b sf origin/serverfix # 命令原型：git checkout -b <local branch name> <remote branch name>
+```
+
+现在，本地分支`sf`会自动从`origin/serverfix`拉取。
+
+设置已有的本地分支跟踪一个刚刚拉取下来的远程分支，或者想要修改正在跟踪的上游分支，你可以在任意时间使用`-u`或`--set-upstream-to`选项运行`git branch`来显式地设置。
+
+```shell
+git branch -u origin/serverfix
+```
+
+如果想要查看设置的所有**跟踪分支**，可以使用`git branch`的`-vv`选项。 这会将所有的本地分支列出来并且包含更多的信息，如每一个分支正在跟踪哪个远程分支与本地分支是否是领先、落后或是都有。
+
+```shell
+git branch -vv
+  iss53     7e424c3 [origin/iss53: ahead 2] forgot the brackets
+  master    1ae2a45 [origin/master] deploying index fix
+* serverfix f8674d9 [teamone/server-fix-good: ahead 3, behind 1] this should do it
+  testing   5ea463a trying something new
+```
+
+这里可以看到`iss53`分支正在跟踪`origin/iss53`并且'`ahead`'是`2`，意味着本地有两个提交还没有推送到服务器上。也能看到`master`分支正在跟踪`origin/master`分支并且是最新的。 接下来可以看到`serverfix`分支正在跟踪`teamone`服务器上的`server-fix-good`分支并且领先`3`落后`1`， 意味着服务器上有一次提交还没有合并入同时本地有三次提交还没有推送。 最后看到`testing`分支并没有跟踪任何远程分支。
+
+需要重点注意的一点是这些数字的值来自于你从每个服务器上**最后**一次`fetch`的数据。 这个命令并没有连接服务器，它只会告诉你关于本地缓存的服务器数据。 如果想要统计最新的领先与落后数字，需要在运行此命令前抓取所有的远程仓库。 可以像这样做：
+
+```shell
+git fetch --all; git branch -vv
+```
+
+###### `fetch`
+
+当`git fetch`命令从服务器上抓取本地没有的数据时，它并不会修改工作目录中的内容。 它只会获取数据然后让你自己合并。 然而，有一个命令叫作`git pull`在大多数情况下它的含义是一个`git fetch` 紧接着一个`git merge`命令。 如果有一个像之前章节中演示的设置好的跟踪分支，不管它是显式地设置还是通过`clone`或 `checkout`命令为你创建的，`git pull`都会查找当前分支所跟踪的服务器与分支， 从服务器上抓取数据然后尝试合并入那个远程分支。
+
+由于`git pull`的魔法经常令人困惑所以通常单独显式地使用`fetch`与`merge`命令会更好一些。
+
+#### `Push`到远程常用命令
+
+```shell
+git push origin master # Git 自动将 master 分支名字展开为 refs/heads/master:refs/heads/master。将本地的master分支推送到origin远程仓库的master分支。如果master不存在，则会被新建。
+git push origin :master # 等同于 git push origin --delete master
+git push origin # 将当前分支推送到origin远程仓库的对应分支。如果当前分支只有一个追踪分支，那么仓库名都可以省略。即：git push
+git push -u origin master # -u 为--set-upstream 缩写。设置的当前分支跟踪一个远程master分支。
+git push --all origin # 将所有本地跟踪分支都推送到origin远程仓库。
+git push origin HEAD # 将当前分支推到远程上相同名称的分支。
+git push origin HEAD:master #将当前分支推到“origin”远程仓库中“master”分支。
+git push origin master:refs/heads/experimental #通过复制当前主分支，在origin存储库中创建experimental的分支。当本地名称和远程名称不同时，只需要在远程存储库中创建新的分支或标记;否则，使用ref名称本身。
+```
+
+#### `fetch`到本地常用命令
+
+配置默认的分支：
+
+```shell
+[branch "master"]
+   remote = origin
+   merge = refs/heads/master
+```
+
+```shell
+git fetch --all # 抓取所有的远程仓库的分支、标签等
+git fetch origin # 从远程refs/heads/命名空间复制所有分支，并将它们存储到本地的refs/remotes/origin/命名空间中，除非使用branch.<name>.fetch选项来指定非默认的refspec
+git fetch origin master # Git 自动将 master 分支名字展开为 refs/heads/master:refs/heads/master。将origin远程仓库的master分支。拉取到本地的master分支。
 git pull # 等于 fetch + merger，即：拉取远程分支，合并本地和远程分支。
          # 完整命令是：git pull origin [本地分支]：[远程分支]相当于git pull + git checkout -b [本地分支名] [远程分支名]
-git checkout -b [本地分支名] [远程分支名]# 创建一个基于远程分支的本地分支，并切换到该分支。或者可以理解为创建一个本地分支，并和追踪分支关联。切换到该分支。
-git checkout -b [本地分支名] --track [远程分支名] #创建一个本地分支，并和追踪分支关联。切换到该分支。
-git checkout --track [远程分支名] #创建一个和追踪分支名字一样的本地分支，并和追踪分支关联。切换到该分支。
+git checkout -b [本地分支名] [远程跟踪分支名]# 创建一个基于远程跟踪分支的本地分支，并切换到该分支。
+git checkout -b [本地分支名] --track [远程跟踪分支名] #创建一个追踪分支，跟踪远程跟踪分支。切换到该分支。
+git checkout --track [远程跟踪分支名] #为git checkout -b [本地分支名] [远程跟踪分支名]的快捷方式
+git checkout [远程分支名] #为git checkout -b [本地分支名] [远程跟踪分支名]的快捷方式，有条件限制：该分支名称不存在，且仅与一个远程仓库上的分支名称完全匹配
+git branch -u [远程跟踪分支名] #为已有的本地分支设置远程跟踪分支。
 ```
 
 ### 删除远程仓库分支
@@ -994,8 +1117,8 @@ git checkout --track [远程分支名] #创建一个和追踪分支名字一样�
 ```shell
 git push origin :[分支名]# git push origin [本地分支]:[远程分支名]命令，作用是将本地的远程分支和本地分支同步，所以将本地分支置为 空，即可删除远程分支。
 git push origin --delete [分支名]
-git remote prune origin --dry-run # 查看不需要再追踪的远程分支，即本地有远程追踪的分支，但远程分支已经删除了。
-git remote prune origin #清理远程无效的追踪分支（本地中保存远程的分支）。
+git remote prune origin --dry-run # 查看不需要的远程跟踪分支，即本地有远程追踪分支，但远程分支已经删除了。
+git remote prune origin #清理无效的远程追踪分支。
 ```
 
 ### 远程标签
